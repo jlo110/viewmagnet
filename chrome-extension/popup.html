@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViewMagnet</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎬 ViewMagnet</h1>
+      <p class="subtitle">Video Performance Predictor</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Analyzing video...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error hidden">
+      <p id="error-message"></p>
+      <button id="retry-btn" class="btn btn-primary">Try Again</button>
+    </div>
+
+    <!-- Not on YouTube -->
+    <div id="not-youtube" class="not-youtube hidden">
+      <p>📺 Open a YouTube video to analyze it!</p>
+      <div class="input-group">
+        <input type="text" id="manual-url" placeholder="Or paste YouTube URL...">
+        <button id="analyze-btn" class="btn btn-primary">Analyze</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="results hidden">
+      <!-- Score Card -->
+      <div class="score-card">
+        <div class="score-main">
+          <span id="score" class="score">--</span>
+          <span id="tier" class="tier">---</span>
+        </div>
+        <div id="title" class="video-title"></div>
+      </div>
+
+      <!-- Component Scores -->
+      <div class="components">
+        <div class="component">
+          <span class="component-score" id="title-score">--</span>
+          <span class="component-label">Title</span>
+        </div>
+        <div class="component">
+          <span class="component-score" id="thumb-score">--</span>
+          <span class="component-label">Thumbnail</span>
+        </div>
+        <div class="component">
+          <span class="component-score" id="channel-score">--</span>
+          <span class="component-label">Channel</span>
+        </div>
+      </div>
+
+      <!-- Key Factors -->
+      <div class="section">
+        <h3>💡 Key Factors</h3>
+        <div id="factors" class="factors-list"></div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="section">
+        <h3>🎯 Recommendations</h3>
+        <div id="recommendations" class="recommendations-list"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button id="open-full" class="btn btn-secondary">Open Full Dashboard</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="#" id="settings-link">Settings</a>
+      <span>•</span>
+      <a href="https://ViewMagnet.app" target="_blank">ViewMagnet.app</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
+
+
+

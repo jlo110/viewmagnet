@@ -1,0 +1,9 @@
+node_modules
+src
+tests
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+pnpm-lock.yaml
+*.bak
+.DS_Store

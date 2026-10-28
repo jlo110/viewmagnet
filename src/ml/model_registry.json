@@ -1,0 +1,124 @@
+{
+  "_comment": "Single source of truth for ML model artifacts (Phase 3.4 / 6.8). Committed in-repo because the artifacts themselves (models/, data/models/) are gitignored and local-only \u2014 this survives a disk loss and documents what SHOULD exist. 'metric' values are recorded AS STORED; read 'metric_caveat' for the honest read. status: live = served by the API; prototype = built, not wired; dormant = code exists, not imported; deprecated = superseded, delete after off-machine backup.",
+  "version": 1,
+  "updated_at": "2026-06-09",
+  "models": {
+    "content_classifier": {
+      "task": "Pre-upload overperform classifier (views vs channel baseline)",
+      "artifact": "data/models/clean_predictor.pkl",
+      "loader": "src/api/analyze.py",
+      "type": "XGBoost",
+      "features": "409 (25 hand-crafted + 384 title embeddings)",
+      "metric": {
+        "balanced_acc": 0.746,
+        "f1": 0.638,
+        "split": "random"
+      },
+      "metric_caveat": "0.746 is random-split (mild inflation). Honest channel-grouped CV (Phase 6.1) = bal-acc ~0.690 / AUC ~0.814. The old '90-94%' docstring claim is UNSUBSTANTIATED. A lean 25-feature variant (data/models/clean_predictor_lean.pkl, holdout 0.701) drops the embedding dependency for ~equal accuracy; swap deferred (needs tier-threshold recalibration).",
+      "status": "live"
+    },
+    "velocity_horizons": {
+      "task": "View-count projection across checkpoint horizons (from -> to)",
+      "artifact": "models/velocity_models_index.joblib",
+      "per_horizon_artifacts": "models/velocity_<from>_to_<to>.joblib (10 horizons)",
+      "loader": "src/ml/velocity_predictor_v2.py",
+      "type": "per-(from->to) regressors",
+      "metric": {
+        "stored_r2_range": [
+          0.914,
+          0.993
+        ],
+        "split": "random",
+        "trained_at": "2026-02-21"
+      },
+      "metric_caveat": "Stored R\u00b2 0.91-0.99 is AUTOCORRELATION, not skill \u2014 closer horizons (7d->14d, 14d->30d) score highest precisely because views barely change (trivial persistence). One stored 'accuracy' is -4138 (broken). NOT a real accuracy. Honest metric = lift over persistence baseline via scripts/backtest_predictions.py (first live signal: 1h->6h MAPE 51%, median growth 3.83x). Trained on the now-LOST scrape; cannot be retrained until the rebuilt dataset matures (~30d).",
+      "status": "live"
+    },
+    "velocity_v3_single": {
+      "task": "Legacy single velocity model (hardcoded path)",
+      "artifact": "models/velocity_model_v3.joblib",
+      "loader": "src/ml/velocity_predictor.py (hardcoded model_path)",
+      "type": "single regressor",
+      "metric": {
+        "claimed_accuracy": "90-94%",
+        "split": "random"
+      },
+      "metric_caveat": "The '90-94% accuracy' in the docstring is UNSUBSTANTIATED (same autocorrelation issue). velocity_predictor_v2 + the per-horizon index supersede this. Confirm whether the velocity router still loads this; if not, deprecate.",
+      "status": "live"
+    },
+    "reach_predictor": {
+      "task": "Absolute breakout / reach (top-quartile views-per-subscriber) from thumbnail+title",
+      "artifact": "data/models/reach_predictor.pkl",
+      "loader": "(prototype \u2014 not yet wired to the API)",
+      "type": "XGBoost + frozen CLIP (ViT-B/32)",
+      "features": "1049 (25 hand-crafted + 512 CLIP image + 512 CLIP text)",
+      "metric": {
+        "grouped_cv_auc": 0.615,
+        "split": "channel-grouped",
+        "n_train": 4950,
+        "trained_at": "2026-06-08"
+      },
+      "metric_caveat": "Honest channel-grouped AUC 0.615 vs 0.51 (chance) for hand-crafted-alone on this target \u2014 thumbnails/titles ARE the signal for absolute reach (Phase 6.1). Frozen-CLIP baseline; SUPERSEDED by the end-to-end fine-tune (reach_predictor_clip) which scored 0.667. Kept as the fallback when torch is unavailable.",
+      "status": "fallback"
+    },
+    "reach_predictor_clip": {
+      "task": "Absolute breakout / reach from thumbnail+title \u2014 end-to-end fine-tuned CLIP",
+      "artifact": "data/models/reach_head.pt",
+      "trainer": "scripts/finetune_reach_clip.py (Colab T4)",
+      "loader": "src/features/reach_model.py",
+      "type": "frozen CLIP ViT-B/32 (img+text) + trained fusion head (linear probe)",
+      "metric": {
+        "val_auc": 0.668,
+        "split": "channel-grouped val",
+        "n_train": 31899,
+        "n_val": 8101,
+        "trained_at": "2026-06-13"
+      },
+      "metric_caveat": "HEAD-ONLY linear probe beat both the frozen-XGBoost baseline (0.615) and the full end-to-end fine-tune (0.667): val AUC 0.668. Finding: unfreezing the CLIP backbone added nothing \u2014 the breakout signal is already in frozen CLIP's projected embeddings; only the fusion head matters. Artifact is just the 4 head tensors (~1MB) + stock CLIP from HF, so prod-deliverable (vs 578MB full-state). Served by the candidate ranker (src/features/reach_model.py).",
+      "status": "live"
+    },
+    "breakout_detector": {
+      "task": "Early breakout detector (7.3): P(top-quartile channel-relative overperformance at 24h) from 6h signals",
+      "artifact": "data/models/breakout_calibrator.json",
+      "trainer": "scripts/train_breakout_calibrator.py",
+      "loader": "src/features/breakout_detector.py",
+      "type": "single-feature (early views vs channel leave-one-out baseline) + isotonic calibration",
+      "features": "1 (views_vs_chanbase at the early checkpoint)",
+      "metric": {
+        "grouped_cv_auc": 0.9275,
+        "split": "channel-grouped",
+        "from_cp": "6h",
+        "to_cp": "24h",
+        "breakout_pct": 25.0,
+        "n_train": 15274,
+        "trained_at": "2026-06-11"
+      },
+      "variants": {
+        "1h": {
+          "artifact": "data/models/breakout_calibrator_1h.json",
+          "grouped_cv_auc": 0.8503,
+          "n_train": 15477,
+          "trained_at": "2026-06-12",
+          "note": "earlier call, honestly lower certainty (P caps at 0.845); loaded via calibrator_path('1h')"
+        }
+      },
+      "metric_caveat": "HONEST grouped-CV AUC 0.93 (scripts/evaluate_breakout.py). Deliberately a single explainable feature: a full XGBoost on all early features adds only +0.01-0.016 AUC, so this captures ~99% of the achievable signal. This is the *classification* reframe \u2014 the velocity POINT predictor loses to baseline on MAPE (docs/velocity_eval_report.md), but breakout is highly predictable. Probability is isotonic-calibrated. Trained on the rebuilt collection; re-fit as data matures. Channel baseline needs the channel's other tracked videos at the same checkpoint.",
+      "status": "prototype"
+    },
+    "dormant_and_deprecated": {
+      "task": "Code exists but NOT imported by the API/features \u2014 carry random-split leakage, serve no users",
+      "artifacts": {
+        "combined_predictor.pkl": "src/ml/combined_predictor.py (dormant)",
+        "improved_predictor.pkl": "src/ml/improved_predictor.py (dormant)",
+        "predictor_v2.pkl": "src/ml/improved_predictor_v2.py (dormant; artifact may be absent)",
+        "thumbnail_predictor.pkl": "src/ml/thumbnail_predictor.py (dormant)",
+        "performance_model.pkl": "src/ml/performance_classifier.py (dormant; artifact may be absent)",
+        "velocity_model.joblib": "superseded by v2/v3 (deprecated)",
+        "velocity_model_v2.joblib": "superseded by per-horizon index (deprecated)",
+        "velocity_*_growth*.joblib": "growth-variant experiments (status unclear)"
+      },
+      "metric_caveat": "Decide per the data-loss note (memory/ml-data-disconnected.md): wire up under grouped CV or delete. Do NOT delete blindly \u2014 models/ + data/ are gitignored and exist on ONE machine; back up off-machine first.",
+      "status": "dormant"
+    }
+  }
+}

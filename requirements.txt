@@ -1,0 +1,167 @@
+# ============================================================
+# YouTube API
+# ============================================================
+google-api-python-client>=2.111.0
+google-auth>=2.25.2
+google-auth-oauthlib>=1.2.0
+
+# ============================================================
+# Web Framework
+# ============================================================
+# NOTE: starlette 1.x (released 2026-06-14) rewrote router internals
+# (_IncludedRouter) and breaks route introspection on every request; fastapi
+# 0.137+ pairs with it. Cap below those majors until the app is verified on 1.x.
+fastapi>=0.109.0,<0.137
+uvicorn>=0.27.0,<1.0
+starlette>=0.35.0,<1.0
+
+# ============================================================
+# Database
+# ============================================================
+sqlalchemy>=2.0.23,<3.0
+greenlet>=3.0.3   # required for SQLAlchemy async (AsyncSession)
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+asyncpg>=0.29.0
+aiosqlite>=0.19.0
+
+# ============================================================
+# Authentication
+# ============================================================
+PyJWT>=2.8.0
+bcrypt>=4.2.0
+python-multipart>=0.0.6
+email-validator>=2.0.0
+cryptography>=42.0.0
+pyotp>=2.9.0
+
+# ============================================================
+# HTTP & Async
+# ============================================================
+aiohttp>=3.9.1
+httpx>=0.26.0,<1.0
+tenacity>=8.2.3
+boto3>=1.34.0   # Cloudflare R2 (S3-compatible) — renders + thumbnail archiving
+
+# ============================================================
+# ML / Data Science
+# ============================================================
+numpy>=1.26.2
+pandas>=2.2.0
+scikit-learn>=1.4.0
+xgboost>=2.0.3
+lightgbm>=4.3.0
+joblib>=1.3.2
+shap>=0.44.0
+
+# ============================================================
+# NLP / Embeddings
+# ============================================================
+sentence-transformers>=2.3.1
+transformers>=4.37.0
+torch>=2.1.2
+
+# ============================================================
+# Image Processing
+# ============================================================
+Pillow>=10.2.0
+opencv-python>=4.9.0
+# NOTE: deepface drags in tensorflow which requires Python <=3.12.
+# dev.sh creates the venv with Python 3.11 to keep this happy.
+deepface>=0.0.89
+tensorflow>=2.16.0,<2.20.0      # pinned for deepface compat
+tf-keras>=2.16.0                # deepface needs Keras 2 surface
+easyocr>=1.7.1
+rembg>=2.0.50
+
+# ============================================================
+# Subject Tracking (for smart vertical crops)
+# ============================================================
+ultralytics>=8.1.0
+mediapipe>=0.10.9
+
+# ============================================================
+# AI Services
+# ============================================================
+anthropic>=0.18.0
+# Groq is the free/fast LLM fallback when Anthropic is out of credits.
+# Without this package, src/features/shorts/score.py logs `groq_missing`
+# and the highlight-detection pipeline falls back to heuristic-only scoring.
+groq>=0.11.0
+replicate>=0.25.0
+openai>=1.10.0
+
+# ============================================================
+# Transcription
+# ============================================================
+# youtube-transcript-api fetches free captions first (no audio download
+# required). yt-dlp + Whisper is the fallback when captions are disabled —
+# both need the ``ffmpeg`` system binary on PATH (dev.sh installs it via brew).
+youtube-transcript-api>=0.6.2
+openai-whisper>=20231117
+yt-dlp>=2024.1.0
+
+# ============================================================
+# Trends & Analytics
+# ============================================================
+pytrends>=4.9.2
+
+# ============================================================
+# Streamlit UI (legacy)
+# ============================================================
+
+# ============================================================
+# Configuration
+# ============================================================
+# Major-version caps on the app-critical stack (fastapi/starlette/pydantic/
+# sqlalchemy/uvicorn/httpx): a new MAJOR of any of these = total outage, and
+# the unpinned '>=' floors let CI/prod silently pull it (see the starlette 1.x
+# incident, 2026-06-14). Caps below the next major; raise deliberately + test.
+python-dotenv>=1.0.0
+pydantic>=2.5.3,<3.0
+pydantic-settings>=2.1.0,<3.0
+
+# ============================================================
+# Logging & Monitoring
+# ============================================================
+structlog>=23.3.0
+rich>=13.7.0
+
+# ============================================================
+# Rate Limiting & Cache & Queue
+# ============================================================
+ratelimit>=2.2.1
+slowapi>=0.1.9
+redis>=5.0.0
+rq>=1.16.0
+apscheduler>=3.10.0
+
+# ============================================================
+# Observability
+# ============================================================
+prometheus-fastapi-instrumentator>=7.0.0
+opentelemetry-instrumentation-fastapi>=0.46b0
+opentelemetry-exporter-otlp-proto-http>=1.25.0
+
+# ============================================================
+# CLI
+# ============================================================
+typer>=0.9.0
+
+# ============================================================
+# Testing
+# ============================================================
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+httpx>=0.26.0,<1.0  # for TestClient
+
+# ============================================================
+# Stripe Payments
+# ============================================================
+stripe>=8.0.0
+
+# ============================================================
+# Monitoring & Error Tracking
+# ============================================================
+sentry-sdk[fastapi]>=1.39.0

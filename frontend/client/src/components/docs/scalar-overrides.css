@@ -1,0 +1,84 @@
+/*
+ * Scalar dark-theme tuning to match the ViewMagnet brand palette.
+ *
+ * Scalar exposes a deep set of CSS custom properties prefixed with
+ * ``--scalar-`` for theming. We only override what's needed to land
+ * the colours and the sidebar density — everything else inherits
+ * Scalar's defaults so we don't need to chase upstream upgrades.
+ *
+ * Brand reference (see ``frontend/tailwind.config.ts``):
+ *   deep-charcoal  #0a0a0a   page background
+ *   gunmetal       #18181b   panel background
+ *   cyan-glow      #00e5ff   primary accent (links, focused inputs)
+ *   amber-glow     #ffb547   secondary accent (warnings, success in dark)
+ *
+ * The override is scoped to ``.scalar-app`` (Scalar's root class) so
+ * none of these variables leak into the rest of the SPA.
+ */
+
+.scalar-app {
+  /* --- Page chrome ------------------------------------------------- */
+  --scalar-background-1: #0a0a0a;
+  --scalar-background-2: #111114;
+  --scalar-background-3: #18181b;
+  --scalar-background-accent: rgba(0, 229, 255, 0.08);
+
+  --scalar-border-color: rgba(255, 255, 255, 0.08);
+
+  --scalar-color-1: #f4f4f5;
+  --scalar-color-2: #d4d4d8;
+  --scalar-color-3: #a1a1aa;
+  --scalar-color-accent: #00e5ff;
+
+  /* --- Buttons / interactive surfaces ------------------------------ */
+  --scalar-button-1: #00e5ff;
+  --scalar-button-1-color: #0a0a0a;
+  --scalar-button-1-hover: #38f0ff;
+
+  /* --- Code blocks ------------------------------------------------- */
+  --scalar-code-background: #0d0d10;
+  --scalar-code-color: #f4f4f5;
+
+  /* --- Sidebar ---------------------------------------------------- */
+  --scalar-sidebar-background-1: #0d0d10;
+  --scalar-sidebar-item-active-background: rgba(0, 229, 255, 0.12);
+  --scalar-sidebar-color-1: #d4d4d8;
+  --scalar-sidebar-color-active: #00e5ff;
+  --scalar-sidebar-search-background: #18181b;
+  --scalar-sidebar-search-border-color: rgba(255, 255, 255, 0.08);
+
+  /* --- HTTP method badges ----------------------------------------- */
+  --scalar-color-green: #4ade80;  /* GET   */
+  --scalar-color-blue: #60a5fa;   /* POST  */
+  --scalar-color-orange: #ffb547; /* PUT/PATCH */
+  --scalar-color-red: #f87171;    /* DELETE */
+
+  /* --- Density / typography -------------------------------------- */
+  --scalar-font:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --scalar-font-code:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --scalar-radius: 10px;
+  --scalar-radius-lg: 14px;
+}
+
+/*
+ * Scalar's "Powered by Scalar" badge is opt-out on the OSS package
+ * and we want a clean docs surface — hide it via the documented
+ * `hideClientButton` config flag wherever possible, and fall back to
+ * this CSS hammer for any branded element that ignores the prop.
+ */
+.scalar-app .powered-by,
+.scalar-app .scalar-api-reference-watermark {
+  display: none !important;
+}
+
+/*
+ * Pin the Scalar surface to fill the remaining viewport on the
+ * ``/docs`` page. Without this it collapses to its content-height
+ * which leaves a stripe of black below the sidebar on tall monitors.
+ */
+.scalar-app {
+  min-height: calc(100vh - 4rem);
+}

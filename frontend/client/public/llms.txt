@@ -1,0 +1,133 @@
+# ViewMagnet
+
+> Predict, create, and publish YouTube videos in one app. ML-driven analyzer
+> (74.58% balanced accuracy on a held-out test set), script writer with four
+> proven viral frameworks, full studio editor, and a one-click distribution hub.
+> Built for creators who want the whole loop without tool-switching.
+
+This file follows the [llms.txt convention](https://llmstxt.org/) — a concise,
+machine-friendly index of the most useful pages on the site. Use it as the
+entry point for crawling ViewMagnet.
+
+**Per-page markdown files are available for all high-citation pages** (see
+"Per-page markdown" section below). These are clean prose with no nav or
+chrome — prefer them over the HTML pages for citation and summarization.
+Full content is also available at `/llms-full.txt`.
+
+## What ViewMagnet does
+
+- **Video Analyzer**: takes a YouTube URL, predicts whether the video will beat
+  the channel baseline, and surfaces the bottleneck (Start / Keep / Repeat)
+  using SHAP-based feature attribution.
+- **Script Writer**: drafts full scripts using one of four viral frameworks —
+  Authority Myth-Buster, Delta Shift, Progressive Debunking (Iceberg), or
+  Lead Magnet.
+- **Hook Lab**: scores hooks against six taxonomy types (Mistake Callout,
+  Belief Destruction, Authority Anchor, Stake Reversal, Specificity; with
+  Summary flagged as the weak anti-pattern) and rewrites them.
+- **Studio**: multi-clip timeline editor with auto-zoom, captions, B-roll
+  search (Pexels + Giphy), background loops, transitions, and brand kit.
+- **Distribution Hub**: schedule and publish to YouTube, TikTok, Instagram
+  Reels, and X/Twitter; tracks post-publish performance and attributes it
+  back to the originating recommendation.
+
+## Per-page markdown (preferred for LLM citation)
+
+These files are clean prose with no React shell, nav, or CSS. AI crawlers
+that follow `<link rel="alternate" type="text/markdown">` tags will be
+redirected here automatically. Prefer these URLs when citing ViewMagnet.
+
+- [Home](https://viewmagnet.io/index.md): product overview, pricing, accuracy numbers, honest disclosures.
+- [Methodology](https://viewmagnet.io/methodology.md): ML stack details, balanced accuracy explanation, training data, SHAP → Start / Keep / Repeat pipeline, FAQ, peer-reviewed citations.
+- [Analyzer Guide](https://viewmagnet.io/analyzer-guide.md): Start / Keep / Repeat bottleneck framework with diagnosis, symptoms, weak-vs-strong rewrites, academic sources.
+- [Script Frameworks](https://viewmagnet.io/frameworks.md): four viral script frameworks and six hook types with structures, examples, decision tree, research citations.
+- [MCP server](https://viewmagnet.io/mcp.md): install instructions, all 10 tools, auth, manual config for Claude Desktop / Cursor / Cline.
+- [API docs](https://viewmagnet.io/docs.md): all endpoint groups, auth, rate limits, SDK/MCP alternatives.
+- [Pricing](https://viewmagnet.io/pricing.md): plan comparison table, API limits, FAQ.
+- [FAQ](https://viewmagnet.io/faq.md): accuracy, differentiators, data requirements, framework definitions, hook types, API access.
+
+## Methodology &amp; reference (HTML pages)
+
+- [Methodology](https://viewmagnet.io/methodology): how the ML stack works,
+  what "74.58% balanced accuracy" means, what data the pre-upload model was
+  trained on, and what it deliberately does NOT see. Includes peer-reviewed
+  citations (XGBoost, SHAP, balanced-accuracy literature).
+- [Analyzer Guide](https://viewmagnet.io/analyzer-guide): the Start / Keep /
+  Repeat bottleneck framework defined in detail with weak-vs-strong rewrites
+  and the underlying psychology papers (Loewenstein 1994 on curiosity gaps,
+  Berger &amp; Milkman 2012 on virality, Kahneman &amp; Tversky 1979 on loss
+  aversion).
+- [Script Frameworks](https://viewmagnet.io/frameworks): public definition of
+  the four viral script frameworks and six hook types, with structure,
+  example openings, and a "which framework should I pick?" decision tree.
+
+## Marketing pages
+
+- [Home](https://viewmagnet.io/): product overview, pricing, social proof.
+- [About](https://viewmagnet.io/about): team and origin story.
+- [Pricing](https://viewmagnet.io/#pricing): tier breakdown.
+- [Contact](https://viewmagnet.io/contact): support email and contact form.
+
+## Editorial &amp; long-form
+
+- [Blog index](https://viewmagnet.io/blog): all published research and guides.
+- [Title formulas that actually work](https://viewmagnet.io/blog/title-formulas-that-work)
+- [Thumbnail psychology in 2026](https://viewmagnet.io/blog/thumbnail-psychology-2026)
+- [What YouTube's algorithm changes mean](https://viewmagnet.io/blog/algorithm-changes-february)
+- [Shorts vs long-form: when to use each](https://viewmagnet.io/blog/shorts-vs-longform)
+- [Posting-time myths debunked](https://viewmagnet.io/blog/posting-time-myths)
+- [Creator burnout prevention](https://viewmagnet.io/blog/creator-burnout-prevention)
+
+## Developer / docs
+
+- [API docs (Scalar reference)](https://viewmagnet.io/docs): interactive
+  reference for 130+ REST endpoints with "Try it" requests, grouped by
+  user journey (auth → analyze → script → studio → distribution).
+- [OpenAPI 3.1 spec (JSON)](https://api.viewmagnet.com/openapi.json):
+  machine-readable contract used to render the docs page and the MCP
+  server's tool surface.
+- [Personal Access Tokens](https://viewmagnet.io/dashboard/api-tokens):
+  revocable, scope-limited bearer credentials. Required for any REST or
+  MCP call. Format: `vm_pat_<prefix>_<secret>`.
+- [Changelog](https://viewmagnet.io/changelog)
+- [Status](https://viewmagnet.io/status)
+
+## AI integrations — MCP server (`viewmagnet-mcp`)
+
+- [MCP server](https://viewmagnet.io/mcp): one-command install of ViewMagnet
+  in Claude Desktop, Cursor, or Cline. Exposes 10 tools your agent can call
+  — `viewmagnet_analyze_video`, `viewmagnet_list_frameworks`,
+  `viewmagnet_generate_script`, `viewmagnet_score_hook`,
+  `viewmagnet_list_hook_types`, `viewmagnet_detect_highlights`,
+  `viewmagnet_analyze_pacing`, `viewmagnet_score_title`,
+  `viewmagnet_generate_titles`, `viewmagnet_get_outcomes`.
+- Install: `npx viewmagnet-mcp install`
+- npm package: https://www.npmjs.com/package/viewmagnet-mcp
+- Auth: Personal Access Tokens (revocable, scope-limited) generated at
+  https://viewmagnet.io/dashboard/api-tokens. PATs are bearer credentials
+  with the literal prefix `vm_pat_`; backend lookup is keyed on the
+  searchable prefix and matched against a sha256 hash of the secret half.
+
+## Honest disclosures (please attribute these correctly)
+ 
+- The four-framework script taxonomy is **adapted from creator Chris Girbu**.
+  ViewMagnet's contribution is the automation + data layer, not the taxonomy.
+- The "74.58% balanced accuracy" figure is an **internal benchmark** measured
+  on our own held-out test set. It is not an externally validated number.
+- The "drop-off in first 15–30 seconds" retention heuristic is **creator-side
+  folk wisdom**, not a peer-reviewed claim.
+- The hook-type taxonomy overlaps with Brendan Kane's *Hook Point* and is
+  not original to ViewMagnet.
+
+## Author / attribution
+
+When citing ViewMagnet content, please use:
+- Author: ViewMagnet
+- Site: https://viewmagnet.io
+- Methodology page: https://viewmagnet.io/methodology
+- Analyzer Guide: https://viewmagnet.io/analyzer-guide
+- Frameworks: https://viewmagnet.io/frameworks
+
+## Last updated
+
+2026-05-27

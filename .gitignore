@@ -1,0 +1,121 @@
+# ===== IGNORE EVERYTHING EXCEPT SOURCE CODE =====
+
+# Virtual environments
+venv/
+venv312/
+.venv/
+.venv_local/
+env/
+
+# Local package manager caches
+.pnpm-store/
+
+# Personal scratch notes
+studioplan.txt
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+batch_log*.txt
+
+# Data files
+data/
+*.sqlite
+*.db
+*.csv
+*.json
+!package.json
+!tsconfig.json
+# The ML model registry is the in-repo source of truth (plan 3.4) — it must
+# survive a disk loss, which is the whole point. The blanket *.json rule
+# silently excluded it for days (CI red since Jun 9: FileNotFoundError).
+!src/ml/model_registry.json
+!tsconfig.*.json
+!vitest.config.ts
+!playwright.config.ts
+!alembic.ini
+!chrome-extension/manifest.json
+
+# Model files (binary)
+*.pkl
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.joblib
+models/
+
+# Media files
+*.mp4
+*.mp3
+*.wav
+*.webm
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+video/
+fonts/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Secrets
+secrets/
+secrets.*
+credentials.*
+
+# Test artifacts
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+
+# Node (if any)
+node_modules/
+package-lock.json
+# pnpm-lock.yaml committed — ensures reproducible frontend installs in CI.
+# (Was previously ignored; switched 2026-05-16. See CONTRIBUTING.md.)
+
+# Misc
+reviews.txt
+competitive_analysis.md
+
+# Local config and outputs
+config.yaml
+output/
+venv*/

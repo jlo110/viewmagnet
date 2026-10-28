@@ -1,0 +1,148 @@
+# ViewMagnet — robots.txt
+# https://viewmagnet.io
+#
+# Policy summary:
+#   - All marketing + reference pages: open to every crawler.
+#   - Dashboard, auth, account routes: blocked (private).
+#   - AI / generative-engine crawlers: explicitly allowed on
+#     public content so we are eligible for ChatGPT, Perplexity,
+#     Claude, Bing Copilot, and Google AI Overviews citations.
+#   - Aggressive scrapers / known-bad bots: blocked further down.
+#
+# If you change this file, also update:
+#   - frontend/client/public/sitemap.xml (lastmod entries)
+#   - frontend/client/public/llms.txt    (AI crawler index)
+
+# -----------------------------------------------------------------
+# Default policy (all crawlers)
+# -----------------------------------------------------------------
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard/
+Disallow: /dashboard/*
+Disallow: /api/
+Disallow: /admin/
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Allow crawlers to see static assets even when nested under
+# disallowed paths.
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+Allow: /*.woff$
+Allow: /*.woff2$
+
+# -----------------------------------------------------------------
+# Generative-engine crawlers (explicit opt-in)
+#
+# Listed even though "User-agent: *" already allows them, because
+# some teams default to BLOCKING these bots. We want the opposite:
+# our reference pages (/methodology, /frameworks, /analyzer-guide)
+# carry the most citation value when they're discoverable by AI
+# search engines, since users searching "what is balanced
+# accuracy" or "how does YouTube's algorithm decide reach" are
+# already in the buying funnel.
+# -----------------------------------------------------------------
+
+# OpenAI's training crawler.
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# OpenAI's user-triggered fetcher (ChatGPT browsing).
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# OpenAI search bot.
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Anthropic — generic + specific tokens (the spec is in flux).
+User-agent: anthropic-ai
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Perplexity.
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Google AI Overviews / Gemini training. Distinct from the
+# classic Googlebot — opting out of this does NOT remove you from
+# Google Search.
+User-agent: Google-Extended
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Apple Intelligence / Spotlight Web Search.
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# ByteDance / Doubao.
+User-agent: Bytespider
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Common Crawl (feeds many downstream LLMs).
+User-agent: CCBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# DuckDuckGo's AI-fetch.
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# -----------------------------------------------------------------
+# Pointers
+# -----------------------------------------------------------------
+Sitemap: https://viewmagnet.io/sitemap.xml
+
+# llms.txt is the emerging convention for AI crawlers — a concise
+# project index optimised for token-cheap ingestion. We publish
+# both the short and full variants.
+# https://llmstxt.org/

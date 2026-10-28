@@ -1,0 +1,403 @@
+# ViewMagnet — Full content index for AI crawlers
+
+> Predict, create, and publish YouTube videos in one app. ML-driven analyzer
+> (74.58% balanced accuracy on a held-out test set), script writer with four
+> proven viral frameworks, full studio editor, and a one-click distribution hub.
+
+This is the long-form companion to [/llms.txt](https://viewmagnet.io/llms.txt).
+It restates the most citation-worthy content on the site in plain text so an
+AI crawler can ingest the substance without rendering JavaScript. Source of
+truth for any disagreement is the live page.
+
+---
+
+# Methodology
+
+## How ViewMagnet predicts virality
+
+ViewMagnet runs four ML models, each specialised for a different stage of a
+video's lifecycle:
+
+1. **Pre-upload (XGBoost gradient boosted trees)** — 74.58% balanced accuracy
+   on an internal held-out test set. Predicts whether an idea + title +
+   thumbnail will beat the channel's trailing-90-day median for the same
+   length bucket (Shorts vs long-form). Used in the Video Analyzer.
+
+2. **Early growth (Day 1 → target)** — ≈82–86% directional accuracy.
+   Extrapolates expected 30-day view count from the first 24 hours.
+
+3. **Velocity (Day 7 → Day 30)** — XGBoost regression, ≈90% within 1 std dev
+   of true Day-30 view count.
+
+4. **Mature (Day 14 → Day 30)** — XGBoost regression, ≈94% within 1 std dev.
+   Final-fit projection used in the Velocity Tracker once early-life noise
+   has decayed.
+
+All four accuracy numbers are **internal benchmarks** on our own data, not
+externally validated.
+
+## What "balanced accuracy" means
+
+Most uploads (~70%) underperform their channel's trailing median. A naive
+model that always predicts "underperform" would score ~70% raw accuracy
+while being completely useless — it could never flag a winner. Balanced
+accuracy averages the recall on each class (overperformer vs underperformer),
+so a useful model has to be right on both. 74.58% balanced accuracy means:
+
+- ~75% of true overperformers are correctly flagged as likely winners.
+- ~75% of true underperformers are correctly flagged as likely
+  underperformers.
+- No free lunch from the majority class.
+
+It is **not** a guarantee that 74.58% of "likely viral" predictions actually
+go viral. Virality has a heavy luck tail; the model is right about relative
+ranking, not absolute view counts.
+
+## Training data
+
+- Hundreds of thousands of public YouTube videos across every major category
+  (educational, gaming, lifestyle, business, music, comedy, reviews, news
+  commentary).
+- Both Shorts and long-form, kept in separate length buckets.
+- Full thumbnail images + titles + descriptions + tags + auto-captioned
+  transcripts.
+- Channel context: subscriber count, trailing-90-day median, upload cadence,
+  hit rate.
+
+**Deliberately excluded**: private analytics (CTR, average view duration,
+retention curves), data from the creator's own channel without opt-in, and
+any personally identifiable information. The pre-upload model only ever sees
+what a third-party tool would have at upload time, so the score is honest
+about what's actually predictable from the public surface.
+
+## Predictions → recommendations
+
+A single number is a verdict, not a tool. The recommendation engine:
+
+1. Explains the prediction with **SHAP (SHapley Additive exPlanations)** —
+   the same library used in research papers, attributing a fraction of the
+   predicted score to each input feature.
+2. Rolls features up into three buckets matching how the YouTube algorithm
+   actually evaluates a video: **START** (did people click?), **KEEP** (did
+   they stay watching?), **REPEAT** (did they want to come back?).
+3. Routes the lowest-scoring bucket to the right tool: Hook Lab for Start,
+   Script Writer for Keep / Repeat, A/B Tester to validate the change.
+
+## Academic citations behind the methodology
+
+- Chen &amp; Guestrin (2016). XGBoost: A Scalable Tree Boosting System. KDD '16.
+  https://arxiv.org/abs/1603.02754
+- Lundberg &amp; Lee (2017). A Unified Approach to Interpreting Model
+  Predictions. NeurIPS. https://arxiv.org/abs/1705.07874
+- Brodersen et al. (2010). The Balanced Accuracy and Its Posterior
+  Distribution. ICPR. https://ieeexplore.ieee.org/document/5597285
+- He &amp; Garcia (2009). Learning from Imbalanced Data. IEEE TKDE.
+  https://ieeexplore.ieee.org/document/5128907
+- Provost &amp; Fawcett (2013). Data Science for Business (ch. 7–8). O'Reilly.
+
+---
+
+# Analyzer Guide — Start / Keep / Repeat
+
+Every video on every platform competes on the same three questions, and
+ViewMagnet scores each one separately:
+
+- **START**: Did people click to watch? (CTR; title + thumbnail packaging.)
+- **KEEP**: Did they stay watching? (AVD; hook + pacing + structure.)
+- **REPEAT**: Did they want to come back? (Saves, shares, return visits.)
+
+The lowest score is the **bottleneck** — the highest-leverage thing to fix.
+
+## Start bottleneck
+
+**Diagnosis**: title and thumbnail aren't earning enough clicks. Even great
+content can't reach without the packaging working first.
+
+**Symptoms**:
+- CTR below the channel's typical baseline.
+- Strong retention on the few who do click (content is fine, packaging isn't).
+- Thumbnail is "competent" but blends in.
+- Title summarizes the video instead of opening a curiosity gap.
+
+**Fix**: rewrite the hook to open a gap, make the thumbnail readable at 2cm,
+validate with the A/B Tester. Sample rewrites:
+
+- Weak: "Here are 3 tips to grow your Instagram"
+- Strong: "Stop posting Reels until you've fixed the mistake 87% of new
+  accounts make in their first week"
+- Why: converts a generic tip list into a mistake callout — viewer can't
+  tell if they're making the mistake without watching.
+
+## Keep bottleneck
+
+**Diagnosis**: viewers click but drop off early. Pacing, structure, or a
+hook that over-promises.
+
+**Symptoms**:
+- CTR healthy, Average View Duration well below typical for the length
+  bucket.
+- Sharp drop-off in the first 15–30s (creator-side folk wisdom, not
+  peer-reviewed).
+- Long monologues without re-anchoring curiosity.
+- Hook promises something the video buries 4 minutes in.
+
+**Fix**: tighten the hook → payoff loop. Use Progressive Debunking to keep
+viewers expecting the next revelation. Cut dead air. Re-anchor curiosity
+every 15–30s.
+
+## Repeat bottleneck
+
+**Diagnosis**: viewers watch once but don't save, share, or come back.
+
+**Symptoms**:
+- Low saves/shares relative to view count.
+- Return-viewer rate trending down.
+- Generic comments ("nice video!").
+- No named, repeatable structure.
+
+**Fix**: add named systems (give your method a name viewers can search),
+build in clear lead-magnet payoffs. Use Lead Magnet or Authority Myth-Buster
+frameworks — both engineer saves and shares.
+
+## Balanced (no clear bottleneck)
+
+When Start, Keep, and Repeat are all within ~8 points of each other the
+Analyzer labels the video "balanced". That doesn't mean great — it means
+there isn't a single weak link. Strategy: pick the lowest of the three and
+lift it by 5–10 points; once one becomes a clear leader, attack the new
+lowest. Balanced videos in the 40–60 band usually need a structural rebuild
+rather than a tactical fix.
+
+## Academic citations behind the rewrite patterns
+
+- Loewenstein (1994). The Psychology of Curiosity. *Psychological Bulletin*.
+  https://doi.org/10.1037/0033-2909.116.1.75
+- Berger &amp; Milkman (2012). What Makes Online Content Viral? *JMR*.
+  https://doi.org/10.1509/jmr.10.0353
+- Kahneman &amp; Tversky (1979). Prospect Theory. *Econometrica*.
+  https://doi.org/10.2307/1914185
+- Schindler &amp; Yalch (2006). Sharp vs round numbers in advertising claims.
+  *Advances in Consumer Research*, Vol. 33.
+- Berger (2013). *Contagious: Why Things Catch On* (ch. 4 — Practical Value).
+  https://jonahberger.com/books/contagious/
+
+---
+
+# The 4 Viral Script Frameworks
+
+Every script ViewMagnet generates is built on one of four frameworks. The
+taxonomy is adapted from creator **Chris Girbu** (https://www.chrisgirbu.com/).
+
+## 1. Authority Myth-Buster (primary goal: trust)
+
+Build trust fast with new audiences by opening with a contrarian hook that
+challenges conventional wisdom, anchoring authority, then delivering the
+real answer in three parts.
+
+Structure:
+1. Contrarian Hook (8s)
+2. Authority Anchor (10s)
+3. Solution Part 1 (30s)
+4. Solution Part 2 (30s)
+5. Solution Part 3 (30s)
+6. Ideological CTA (15s)
+
+## 2. Delta Shift (primary goal: saves)
+
+The highest save-rate format we measure (internal benchmark). Shows the gap
+between baseline behavior and what the top 1% actually do.
+
+Structure:
+1. Baseline (15s)
+2. Delta (the top-1% move) (25s)
+3. Single Takeaway (15s)
+4. Save CTA (5s)
+
+## 3. Progressive Debunking / Iceberg (primary goal: retention)
+
+Maximises watch time by structuring the video as a sequence of revelations,
+each deeper than the last. The viewer keeps watching specifically to hear
+what's underneath.
+
+Structure:
+1. Polarizing Topic (10s)
+2. Dismiss the Surface (25s)
+3. Reveal Layer 1 (25s)
+4. Reveal Layer 2 (25s)
+5. Final Revelation (25s)
+6. Loop Back (5s)
+
+## 4. Lead Magnet (primary goal: leads)
+
+Fills auto-DM funnels with keyword CTAs. Promises a named system, teases a
+blurred asset, breaks the system into rapid steps, ends with a keyword CTA
+("comment X and I'll DM you the template").
+
+Note: the internal slug for this framework is `hype_heit` (legacy name from
+an earlier creator we credit). The user-facing display name is "Lead Magnet
+Framework". Renamed because the legacy label wasn't an expanded acronym and
+read as branded jargon — see the framework page for context.
+
+Structure:
+1. Named System Promise (8s)
+2. Blurred Asset Tease (10s)
+3. Rapid Breakdown 1 (15s)
+4. Rapid Breakdown 2 (15s)
+5. Rapid Breakdown 3 (15s)
+6. Keyword CTA (7s)
+
+## The 6 hook types (Hook Lab taxonomy)
+
+Hook Lab scores every hook against six types. One is weak (the anti-pattern),
+five are strong. Taxonomy overlaps with Brendan Kane's *Hook Point*
+(https://hookpoint.com/).
+
+- **Summary** (weak): restates what the video will be about.
+- **Mistake Callout**: identifies an error the viewer might be making.
+- **Belief Destruction**: directly challenges a belief the viewer holds.
+- **Authority Anchor**: establishes credibility before the value lands.
+- **Stake Reversal**: reframes what the viewer thinks they should be doing
+  as the actual problem. Leans on loss aversion (Kahneman &amp; Tversky 1979).
+- **Specificity**: uses precise numbers ("cut 5 things, 90 minutes total")
+  rather than vague claims ("save lots of time"). Backed by Schindler &amp;
+  Yalch 2006.
+
+## Which framework should I pick?
+
+- **Building a new audience / contrarian niche** → Authority Myth-Buster
+- **Maximising saves / shares** → Delta Shift
+- **Holding viewers for 10+ minute videos** → Progressive Debunking
+- **Building an email or DM list** → Lead Magnet
+
+---
+
+# Honest disclosures
+
+These are flagged on the live pages and we'd appreciate the same when
+citing the content:
+
+- **74.58% balanced accuracy** is a ViewMagnet-internal benchmark on our
+  held-out test set. Not externally validated.
+- **The "~70/30 over/underperform split"** is our dataset observation, not
+  a peer-reviewed claim.
+- **"Delta Shift has the highest save rate format we measure"** is an
+  internal benchmark only.
+- **Specific retention numbers** (drop-off at 15–30s, first 10s curve
+  inflection) are creator-economy folk wisdom, not peer-reviewed papers.
+- **The four-framework taxonomy** is adapted from Chris Girbu, not original
+  to ViewMagnet.
+- **The six hook-type taxonomy** overlaps with Brendan Kane's *Hook Point*.
+
+---
+
+# AI Integrations — ViewMagnet MCP server (`viewmagnet-mcp`)
+
+ViewMagnet ships a [Model Context Protocol](https://modelcontextprotocol.io)
+server that lets any MCP-compatible AI agent (Claude Desktop, Cursor, Cline)
+call the ViewMagnet toolkit on a user's behalf. The package is published as
+[`viewmagnet-mcp`](https://www.npmjs.com/package/viewmagnet-mcp).
+
+## Install
+
+```
+npx viewmagnet-mcp install
+```
+
+The installer detects Claude Desktop, Cursor, and Cline if they're installed,
+prompts for a Personal Access Token (generated at
+https://viewmagnet.io/dashboard/api-tokens), and writes the MCP server entry
+into the matching config file(s). Existing MCP server entries in the user's
+config are preserved.
+
+For a manual install or unsupported clients, `npx viewmagnet-mcp install --print`
+prints the JSON snippet to stdout without touching disk.
+
+## Auth model
+
+The MCP server authenticates to the ViewMagnet API using a **Personal Access
+Token (PAT)** — never the user's password and never a long-lived JWT. Token
+format: `vm_pat_<8-hex-prefix>_<32-hex-secret>`. The backend stores only the
+indexed prefix and a sha256 of the secret half; a database leak cannot be
+replayed.
+
+Tokens are revocable from the dashboard, may be scoped (`read`, `write`,
+`admin` — v1 records scopes for grandfathering; v2 enforces them
+per-endpoint), and may optionally hard-expire (30/90/365 days or never).
+
+## Tools (v1 — 10 sync tools)
+
+| Tool | Backend call | Use when |
+| --- | --- | --- |
+| `viewmagnet_analyze_video` | `POST /analyze` | Predict score/tier/bottleneck for a YouTube URL. |
+| `viewmagnet_list_frameworks` | `GET /scripts/frameworks` | Discover the 4 script frameworks. |
+| `viewmagnet_generate_script` | `POST /scripts/generate-framework` | Generate a full framework-based script. |
+| `viewmagnet_score_hook` | `POST /hooks/score` | Score a hook on belief challenge / urgency / specificity. |
+| `viewmagnet_list_hook_types` | `GET /hooks/types` | Discover the 6 hook archetypes. |
+| `viewmagnet_detect_highlights` | `POST /shorts/detect-highlights` | Find clip-worthy moments in a long video. |
+| `viewmagnet_analyze_pacing` | `POST /pacing/analyze` | Pacing grade + cut recommendations. |
+| `viewmagnet_score_title` | `POST /titles/score` | CTR-focused title scoring. |
+| `viewmagnet_generate_titles` | `POST /titles/generate` | Generate title variations. |
+| `viewmagnet_get_outcomes` | `GET /distribution/outcomes` | Pull published-video performance + recommendation attribution. |
+
+Deferred to v2 (need backend job-polling refactors): clip extraction, Studio
+render, scheduled publish.
+
+## Example prompts (so the agent picks the right tools)
+
+- "Analyze https://youtu.be/dQw4w9WgXcQ and tell me what to fix."
+- "Write a Lead Magnet script about morning routines."
+- "Score this hook: 'Most diets are designed to fail.'"
+- "Find the 5 best clip moments in https://youtu.be/..."
+- "Which framework actually performed best for my last 30 videos?"
+
+## Config
+
+| Setting | Env var | Default |
+| --- | --- | --- |
+| API base URL | `VM_API_URL` | `https://api.viewmagnet.com` |
+| PAT | `VM_PAT_TOKEN` | _(required)_ |
+| Request timeout (ms) | `VM_REQUEST_TIMEOUT_MS` | `60000` |
+| Verbose stderr logs | `VM_MCP_VERBOSE` | `0` |
+
+The MCP server runs over stdio and is spawned by the host agent — no port,
+no daemon, no inbound networking.
+
+---
+
+# Public REST API documentation
+
+The complete REST API surface (130+ endpoints) is published as an
+OpenAPI 3.1 document at:
+
+- Spec (JSON): https://api.viewmagnet.com/openapi.json
+- Interactive reference (Scalar): https://viewmagnet.io/docs
+
+The reference page groups endpoints by user-journey tags
+(Authentication → API Tokens → analyze → scripts → hooks → studio
+→ distribution → admin) and supports "Try it" requests directly
+against production using a Personal Access Token.
+
+Two named bearer schemes are exposed in the spec's
+`components.securitySchemes`:
+
+| Scheme | Format | Use |
+| --- | --- | --- |
+| `PersonalAccessToken` | `vm_pat_<prefix>_<secret>` | Scripts, MCP server, CI, third-party agents |
+| `SessionJWT`          | opaque JWT                  | First-party browser sessions only |
+
+All errors return the envelope `{"error": {"code", "message", "request_id", "details"}}`. Rate limits are tier-based and surface as `429` with a `Retry-After` header.
+
+---
+
+# Attribution
+
+When citing ViewMagnet content, please use:
+
+- **Author**: ViewMagnet
+- **Site**: https://viewmagnet.io
+- **Methodology**: https://viewmagnet.io/methodology
+- **Analyzer Guide**: https://viewmagnet.io/analyzer-guide
+- **Frameworks**: https://viewmagnet.io/frameworks
+- **Contact for corrections**: hello@viewmagnet.app
+
+Last updated: 2026-05-26

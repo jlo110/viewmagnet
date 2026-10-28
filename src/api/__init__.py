@@ -1,0 +1,4 @@
+"""
+ViewMagnet API - FastAPI application.
+"""
+

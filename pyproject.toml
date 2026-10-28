@@ -1,0 +1,28 @@
+# Tooling config for the ViewMagnet backend.
+#
+# Ruff is configured as a BLOCKING CI gate (see .github/workflows/ci.yml).
+# The selected rules are the "real bug" class — things that are actually
+# broken at runtime, not stylistic preferences:
+#   E9  — syntax errors
+#   F   — pyflakes: undefined names (F821), unused imports (F401),
+#         f-strings missing placeholders (F541), redefinitions (F811), etc.
+#
+# Stylistic E-rules (E712 ==True, E722 bare-except, E402 import order) are
+# intentionally NOT gated yet to keep the initial blocking gate achievable;
+# add them as the codebase is cleaned up.
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+
+# F841 (local variable assigned but never used): 27 pre-existing occurrences,
+# mostly in src/api/analyze.py. Deferred — some may be dead code masking
+# incomplete logic and need case-by-case review. RATCHET: remove this ignore
+# once those are triaged so dead assignments fail CI.
+ignore = ["F841"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests deliberately use bare names / fixtures that trip some checks.
+"tests/**" = ["F811"]
